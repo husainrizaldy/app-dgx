@@ -7,6 +7,8 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Form;
@@ -28,30 +30,86 @@ class ReviewSubmission extends ViewRecord
                 // Data Pengaju
                 Section::make('Data Pengaju')
                     ->schema([
-                        TextEntry::make('member.name')->label('Nama Pengaju'),
-                        TextEntry::make('phone_number')->label('Nomor Handphone'),
-                        TextEntry::make('education_level')->label('Jenjang Pendidikan'),
-                        TextEntry::make('study_program')->label('Program Studi'),
-                        TextEntry::make('partner_name')->label('Nama Partner / Mahasiswa'),
+                        TextEntry::make('member.name')
+                                    ->label('Nama Pengaju')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1,2,3])),
+
+                        TextEntry::make('researcher_name_2')->label('Nama Peneliti 2')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [2])),
+                        
+                        TextEntry::make('phone_number')
+                                ->label('Nomor Handphone'),
+                        TextEntry::make('education_level')
+                                ->label('Jenjang Pendidikan')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1, 2])),
+                        TextEntry::make('study_program')
+                                ->label('Program Studi')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1, 2])),
+                        TextEntry::make('adhoc_admin_name')
+                                ->label('Nama Admin Tim AdHoc Internal UG')
+                                ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+                        TextEntry::make('adhoc_admin_position')
+                                ->label('Posisi dalam Tim AdHoc Internal')
+                                ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+
+                        TextEntry::make('team_leader_name')
+                                ->label('Nama Ketua Tim AdHoc')
+                                ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+                        TextEntry::make('external_responsible_name')
+                                ->label('Nama Penanggung Jawab External')
+                                ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+                        TextEntry::make('external_institution_name')
+                                ->label('Nama Institusi Eksternal')
+                                ->visible(fn ($record) => in_array($record->research_type_id, [3])),
                     ])
                     ->columns(2),
 
                 // Informasi Penelitian
                 Section::make('Informasi Penelitian')
                     ->schema([
-                        TextEntry::make('research_type')->label('Jenis Penelitian'),
-                        TextEntry::make('research_field')->label('Bidang Penelitian'),
-                        TextEntry::make('research_description')->label('Deskripsi Singkat Penelitian'),
-                        TextEntry::make('supervisor_1')->label('Nama Pembimbing 1'),
-                        TextEntry::make('supervisor_2')->label('Nama Pembimbing 2'),
-                        TextEntry::make('supervisor_3')->label('Nama Pembimbing 3'),
+                        TextEntry::make('researchType.name')
+                                    ->label('Jenis Penelitian'),
+
+                        TextEntry::make('research_field')
+                                    ->label('Bidang Penelitian')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1])),
+
+                        TextEntry::make('research_title')
+                                    ->label('Judul Penelitian')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [2])),
+
+                        TextEntry::make('data_description')
+                                    ->label('Deskripsi Data'),
+                                    
+                        TextEntry::make('research_description')
+                                    ->label('Deskripsi Singkat Penelitian')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1,2])),
+
+                        TextEntry::make('supervisor_1')->label('Nama Pembimbing 1')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1])),
+                        TextEntry::make('supervisor_2')->label('Nama Pembimbing 2')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1])),
+                        TextEntry::make('supervisor_3')->label('Nama Pembimbing 3')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1])),
+
+                        
+
                         TextEntry::make('duration_days')->label('Durasi / (Hari)'),
                         TextEntry::make('research_cost')
                                 ->label('Biaya Penelitian')
                                 ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : '-'),
-                        TextEntry::make('research_output_plan')->label('Rencana Output Penelitian'),
-                        TextEntry::make('previous_research_experience')->label('Pengalaman Penelitian Sebelumnya'),
+
+                        TextEntry::make('research_output_plan')->label('Rencana Output Penelitian')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1,2])),
+
+                        TextEntry::make('previous_research_experience')->label('Pengalaman Penelitian Sebelumnya')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [1,2])),
+
                         TextEntry::make('activity_plan')->label('Rencana Kegiatan'),
+                        TextEntry::make('collaboration_activity_form')->label('Bentuk Kegiatan Kerjasama')
+                                    ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+
+                        
                     ])
                     ->columns(2),
 
@@ -71,14 +129,61 @@ class ReviewSubmission extends ViewRecord
                 // Lampiran Proposal
                 Section::make('Lampiran Proposal')
                     ->schema([
+                        TextEntry::make('submission_letter_file')
+                            ->label('Surat Pengajuan Penggunaan DGX')
+                            ->url(fn ($record) => $record->submission_letter_file
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->submission_letter_file)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
+                            ->hidden(fn ($state) => blank($state)),
+
+                        TextEntry::make('collaboration_document')
+                            ->label('Dokumen Kerjasama')
+                            ->url(fn ($record) => $record->collaboration_document
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->collaboration_document)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
+                            ->hidden(fn ($state) => blank($state))
+                            ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+
+                        TextEntry::make('adhoc_team_document')
+                            ->label('Dokumen Tim AdHoc')
+                            ->url(fn ($record) => $record->adhoc_team_document
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->adhoc_team_document)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
+                            ->hidden(fn ($state) => blank($state))
+                            ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+
+                        TextEntry::make('external_profile_document')
+                            ->label('Profil Institusi Eksternal')
+                            ->url(fn ($record) => $record->external_profile_document
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->external_profile_document)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
+                            ->hidden(fn ($state) => blank($state))
+                            ->visible(fn ($record) => in_array($record->research_type_id, [3])),
+
                         TextEntry::make('proposal_file')
                             ->label('File Proposal')
-                            ->url(fn ($record) => $record->proposal_file ? asset('storage/submissions/proposals/' . $record->proposal_file) : null, shouldOpenInNewTab: true)
+                            ->url(fn ($record) => $record->proposal_file
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->proposal_file)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
                             ->hidden(fn ($state) => blank($state)),
 
                         TextEntry::make('budget_file')
                             ->label('File Rencana Anggaran')
-                            ->url(fn ($record) => $record->budget_file ? asset('storage/submissions/budgets/' . $record->budget_file) : null, shouldOpenInNewTab: true)
+                            ->url(fn ($record) => $record->budget_file
+                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->budget_file)
+                                : null,
+                                shouldOpenInNewTab: true
+                            )
                             ->hidden(fn ($state) => blank($state)),
 
                         TextEntry::make('docker_image')
@@ -87,6 +192,7 @@ class ReviewSubmission extends ViewRecord
                             ->hidden(fn ($state) => blank($state)),
                     ])
                     ->columns(2),
+
 
 
                 // Status Pengajuan

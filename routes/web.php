@@ -30,8 +30,13 @@ Route::middleware('guest.member')->controller(MemberAuthController::class)->grou
 });
 
 Route::middleware('auth.member')->group(function () {
-    Route::get('/submission', [SubmissionController::class, 'index']);
-    Route::post('/submission', [SubmissionController::class, 'store'])->name('submission.store');
+    Route::get('/submission', [SubmissionController::class, 'index'])->name('submission.index');
+
+    Route::post('/submission/ta', [SubmissionController::class, 'store_ta'])->name('submission.store.ta');
+    Route::post('/submission/non-ta', [SubmissionController::class, 'store_non_ta'])->name('submission.store.nonta');
+    Route::post('/submission/instansi', [SubmissionController::class, 'store_instansi'])->name('submission.store.instansi');
+
     Route::get('/status-submission', [SubmissionController::class, 'status_submission']);
+    Route::get('/list-machine', [SubmissionController::class, 'list_machine']);
     Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
 });

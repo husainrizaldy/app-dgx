@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="bg-gray-100 min-h-[calc(100vh-4rem)] pt-28 pb-10 font-urbanist">
-    <div class="container mx-auto px-12 py-6">
+    <div class="container px-10 py-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">STATUS PENGAJUAN</h1>
 
         {{-- Card Tabel Full Lebar --}}
@@ -12,20 +12,19 @@
             <table class="w-full table-auto text-left text-sm text-gray-700">
                 <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
                     <tr>
+                        <th class="px-6 py-4">Tanggal</th>
                         <th class="px-6 py-4">Email</th>
                         <th class="px-6 py-4">Jenis Penelitian</th>
-                        <th class="px-6 py-4">Bidang Penelitian</th>
-                        <th class="px-6 py-4">Deskripsi Singkat</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Note</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @forelse ($submissions as $submission)
-                        <tr>
+                        <tr x-data="{ open: false }">
+                            <td class="px-6 py-4">{{ $submission->created_at->format('Y-m-d H:i') }}</td>
                             <td class="px-6 py-4">{{ $submission->member->email ?? '-' }}</td>
-                            <td class="px-6 py-4">{{ $submission->research_type }}</td>
-                            <td class="px-6 py-4">{{ $submission->research_field }}</td>
-                            <td class="px-6 py-4">{{ Str::limit($submission->research_description, 80) }}</td>
+                            <td class="px-6 py-4">{{ $submission->researchType->name }}</td>
                             <td class="px-6 py-4">
                                 <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full
                                     @switch($submission->status)
@@ -38,6 +37,52 @@
                                     {{ ucfirst($submission->status) }}
                                 </span>
                             </td>
+                            <td class="px-6 py-4">
+                                <button 
+                                    type="button"
+                                    @click="open = true" 
+                                    class="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition"
+                                >
+                                    Note
+                                </button>
+
+                                <!-- Modal -->
+                                <div 
+                                    x-show="open" 
+                                    x-cloak 
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                >
+                                    <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
+                                        <h2 class="text-lg font-semibold mb-4">Catatan</h2>
+
+                                        @if ($submission->notes->isEmpty())
+                                            <p class="text-sm text-gray-700">Tidak ada catatan.</p>
+                                        @else
+                                            <ul class="space-y-4 max-h-60 overflow-y-auto">
+                                                @foreach ($submission->notes as $note)
+                                                    <li class="border border-gray-200 rounded p-3 text-sm">
+                                                        <div class="flex justify-between mb-1">
+                                                            <span class="font-semibold text-gray-800">{{ ucfirst($note->status) }}</span>
+                                                            <span class="text-xs text-gray-500">{{ $note->created_at->format('Y-m-d H:i') }}</span>
+                                                        </div>
+                                                        <p class="text-gray-700 whitespace-pre-line">{{ $note->note }}</p>
+                                                        <p class="text-xs text-gray-500 mt-2">Admin: {{ $note->admin->name ?? '-' }}</p>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+
+                                        <div class="mt-6 text-right">
+                                            <button 
+                                                @click="open = false" 
+                                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium"
+                                            >
+                                                Tutup
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -47,6 +92,7 @@
                         </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
 
@@ -57,6 +103,4 @@
         </div>
     </div>
 </section>
-
-
 @endsection

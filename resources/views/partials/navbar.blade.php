@@ -34,6 +34,7 @@
                     <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-50">
                         <a href="{{ url('/status-submission') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-100">Status Pengajuan</a>
                         <a href="{{ url('/submission') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-100">Pengajuan Baru</a>
+                        <a href="{{ url('/list-machine') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-100">Daftar Mesin</a>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-100">Logout</button>
@@ -58,6 +59,7 @@
             @if(auth('member')->check())
                 <a href="{{ url('/status-submission') }}" class="text-center px-4 py-2 rounded-full text-sm font-semibold transition font-urbanist text-gray-600 hover:bg-purple-600 hover:text-white">Status Pengajuan</a>
                 <a href="{{ url('/submission') }}" class="text-center px-4 py-2 rounded-full text-sm font-semibold transition font-urbanist text-gray-600 hover:bg-purple-600 hover:text-white">Pengajuan Baru</a>
+                <a href="{{ url('/list-machine') }}" class="text-center px-4 py-2 rounded-full text-sm font-semibold transition font-urbanist text-gray-600 hover:bg-purple-600 hover:text-white">Daftar Mesin</a>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="text-center w-full px-4 py-2 rounded-full text-sm font-semibold transition font-urbanist text-gray-600 hover:bg-purple-600 hover:text-white">Logout</button>

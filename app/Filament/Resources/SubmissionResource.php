@@ -32,7 +32,7 @@ class SubmissionResource extends Resource
             ->columns([
                 TextColumn::make('submitted_at')->label('Diajukan')->date(),
                 TextColumn::make('member.name')->label('Nama Pengaju')->searchable(),
-                TextColumn::make('research_type')->label('Jenis Penelitian'),
+                TextColumn::make('researchType.name')->label('Jenis Penelitian'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
