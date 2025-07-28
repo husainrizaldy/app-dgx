@@ -398,7 +398,7 @@ class SubmissionController extends Controller
 
         if (
             ! $submission ||
-            $submission->member_id !== auth('member')->user()->id ||
+            $submission->member_id != auth('member')->user()->id ||
             $submission->status !== 'revision'
         ) {
             return redirect()->route('submission.status')
@@ -429,7 +429,7 @@ class SubmissionController extends Controller
         $submission = Submission::where('uuid', $uuid)->first();
         if (
             ! $submission ||
-            $submission->member_id !== auth('member')->user()->id ||
+            $submission->member_id != auth('member')->user()->id ||
             $submission->status !== 'revision'
         ) {
             return redirect()->route('submission.status')
@@ -493,7 +493,7 @@ class SubmissionController extends Controller
         $submission = Submission::where('uuid', $uuid)->first();
         if (
             ! $submission ||
-            $submission->member_id !== auth('member')->user()->id ||
+            $submission->member_id != auth('member')->user()->id ||
             $submission->status !== 'revision'
         ) {
             return redirect()->route('submission.status')
@@ -555,7 +555,7 @@ class SubmissionController extends Controller
         $submission = Submission::where('uuid', $uuid)->first();
         if (
             ! $submission ||
-            $submission->member_id !== auth('member')->user()->id ||
+            $submission->member_id != auth('member')->user()->id ||
             $submission->status !== 'revision'
         ) {
             return redirect()->route('submission.status')
