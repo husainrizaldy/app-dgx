@@ -15,6 +15,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\Page;
 
 class UserResource extends Resource
 {
@@ -42,8 +45,10 @@ class UserResource extends Resource
                     ->relationship('roles','name'),
                 TextInput::make('password')
                     ->password()
-                    ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->required(fn (Page $livewire) => $livewire instanceof CreateRecord)
             ]);
     }
 

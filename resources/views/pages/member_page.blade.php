@@ -4,11 +4,28 @@
 
 @section('content')
 <section class="bg-gray-100 min-h-[calc(100vh-4rem)] pt-28 pb-10 font-urbanist">
-    <div class="container px-10 py-6">
+    <div class="container mx-auto">
         <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">STATUS PENGAJUAN</h1>
-
+        @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
+            @if (session($type))
+                <div 
+                    x-data="{ show: true }" 
+                    x-show="show" 
+                    x-transition 
+                    class="w-11/12 mx-auto mb-4 p-3 rounded bg-{{ $color }}-100 text-{{ $color }}-800 font-medium text-sm relative"
+                >
+                    {{ session($type) }}
+                    <button 
+                        @click="show = false"
+                        class="absolute top-3 right-5 text-{{ $color }}-800 hover:text-{{ $color }}-900"
+                    >
+                        X
+                    </button>
+                </div>
+            @endif
+        @endforeach
         {{-- Card Tabel Full Lebar --}}
-        <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200 mb-8">
+        <div class="w-11/12 mx-auto overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200 mb-8">
             <table class="w-full table-auto text-left text-sm text-gray-700">
                 <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
                     <tr>
@@ -16,7 +33,8 @@
                         <th class="px-6 py-4">Email</th>
                         <th class="px-6 py-4">Jenis Penelitian</th>
                         <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Note</th>
+                        <th class="px-6 py-4">Revisi</th>
+                        <th class="px-6 py-4">Catatan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -30,7 +48,7 @@
                                     @switch($submission->status)
                                         @case('approved') bg-green-100 text-green-700 @break
                                         @case('rejected') bg-red-100 text-red-700 @break
-                                        @case('revised')  bg-yellow-100 text-yellow-700 @break
+                                        @case('revision')  bg-yellow-100 text-yellow-700 @break
                                         @default bg-gray-100 text-gray-700
                                     @endswitch
                                 ">
@@ -38,12 +56,23 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
+                                @if ($submission->status === 'revision')
+                                    <a href="{{ route('submission.edit', $submission->uuid) }}"
+                                    target="_blank"
+                                    class="inline-block px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600 transition">
+                                        Revisi
+                                    </a>
+                                @else
+                                    <span class="text-gray-500">-</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
                                 <button 
                                     type="button"
                                     @click="open = true" 
                                     class="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition"
                                 >
-                                    Note
+                                    Catatan
                                 </button>
 
                                 <!-- Modal -->
@@ -86,7 +115,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                 Belum ada pengajuan penelitian.
                             </td>
                         </tr>

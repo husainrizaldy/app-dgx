@@ -5,18 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ResearchType extends Model
+class DocType extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
     ];
-
-    public function submissions()
-    {
-        return $this->hasMany(Submission::class);
-    }
 
     public function procedure()
     {

@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="bg-gray-100 min-h-[calc(100vh-4rem)] pt-28 pb-10">
-    <div class="container px-12 py-6">
+    <div class="container mx-auto">
         <div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-8 border border-gray-200">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Login</h2>
             @if (session('success'))
@@ -20,7 +20,10 @@
                     <div>
                         <label for="email" class="block text-sm/6 font-medium text-gray-900">Email</label>
                         <div class="mt-2">
-                            <input type="email" name="email" id="email" autocomplete="given-name" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                            <input type="email" name="email" value="{{ old('email') }}" id="email" autocomplete="given-name" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
                     <div>

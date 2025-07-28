@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Resources\SubmissionResource\Widgets;
 
 use App\Models\Submission;
 use App\Models\Member;
@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Support\Enums\IconPosition;
 
-class SubmissionStats extends BaseWidget
+class SubmissionStatusOverview extends BaseWidget
 {
     protected function getStats(): array
     {

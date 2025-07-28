@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 
 class SubmissionResource extends Resource
 {
@@ -30,11 +31,18 @@ class SubmissionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('submitted_at')->label('Diajukan')->date(),
-                TextColumn::make('member.name')->label('Nama Pengaju')->searchable(),
-                TextColumn::make('researchType.name')->label('Jenis Penelitian'),
+                TextColumn::make('submitted_at')
+                        ->label('Tanggal Pengajuan')
+                        ->dateTime('Y-m-d H:i')
+                        ->sortable(),
+                TextColumn::make('member.email')->label('Email')->searchable()->sortable(),
+                TextColumn::make('member.name')->label('Nama Pengaju')->searchable()->sortable(),
+                TextColumn::make('researchType.name')->label('Jenis Penelitian')->sortable(),
+                TextColumn::make('research_title')->label('Bidang Penelitian')->wrap(),
+                TextColumn::make('research_description')->label('Bidang Penelitian')->limit(25)->wrap(),
                 TextColumn::make('status')
                     ->badge()
+                    ->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
@@ -44,7 +52,25 @@ class SubmissionResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make('review')->label('Review'),
+                Tables\Actions\ViewAction::make('review')
+                    ->label('Review')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->button(),
+            ])
+            ->filters([
+            SelectFilter::make('status')
+                ->label('Status Pengajuan')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                    'revision' => 'Revision',
+                ]),
+
+            SelectFilter::make('research_type_id')
+                ->label('Jenis Penelitian')
+                ->relationship('researchType', 'name'),
             ])
             ->bulkActions([]);
     }

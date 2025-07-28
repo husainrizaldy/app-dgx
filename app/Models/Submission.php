@@ -4,17 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Submission extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'uuid',
         'member_id',
         'research_type_id',
         'researcher_name',
         'researcher_name_2',
         'researcher_name_3',
+        'supervisor_1',
+        'supervisor_2',
+        'supervisor_3',
         'adhoc_admin_name',
         'adhoc_admin_position',
         'team_leader_name',
@@ -54,6 +59,18 @@ class Submission extends Model
         'is_revised' => 'boolean',
         'submitted_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->uuid = (string) Str::uuid();
+        });
+    }
+
+    // public function getRouteKeyName()
+    // {
+    //     return 'uuid';
+    // }
 
     /**
      * Relationship to Member (pembuat submission)

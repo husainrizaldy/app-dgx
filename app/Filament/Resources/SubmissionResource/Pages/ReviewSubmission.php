@@ -13,8 +13,12 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use App\Models\SubmissionNote;
+use Illuminate\Support\Facades\Http;
 
 class ReviewSubmission extends ViewRecord
 {
@@ -131,8 +135,9 @@ class ReviewSubmission extends ViewRecord
                     ->schema([
                         TextEntry::make('submission_letter_file')
                             ->label('Surat Pengajuan Penggunaan DGX')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->submission_letter_file
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->submission_letter_file)
+                                ? asset('storage/submissions/' . $record->submission_letter_file)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -140,8 +145,9 @@ class ReviewSubmission extends ViewRecord
 
                         TextEntry::make('collaboration_document')
                             ->label('Dokumen Kerjasama')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->collaboration_document
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->collaboration_document)
+                                ? asset('storage/submissions/' . $record->collaboration_document)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -150,8 +156,9 @@ class ReviewSubmission extends ViewRecord
 
                         TextEntry::make('adhoc_team_document')
                             ->label('Dokumen Tim AdHoc')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->adhoc_team_document
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->adhoc_team_document)
+                                ? asset('storage/submissions/' . $record->adhoc_team_document)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -160,8 +167,9 @@ class ReviewSubmission extends ViewRecord
 
                         TextEntry::make('external_profile_document')
                             ->label('Profil Institusi Eksternal')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->external_profile_document
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->external_profile_document)
+                                ? asset('storage/submissions/' . $record->external_profile_document)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -170,8 +178,9 @@ class ReviewSubmission extends ViewRecord
 
                         TextEntry::make('proposal_file')
                             ->label('File Proposal')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->proposal_file
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->proposal_file)
+                                ? asset('storage/submissions/' . $record->proposal_file)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -179,8 +188,9 @@ class ReviewSubmission extends ViewRecord
 
                         TextEntry::make('budget_file')
                             ->label('File Rencana Anggaran')
+                            ->state('Lihat File')
                             ->url(fn ($record) => $record->budget_file
-                                ? asset('storage/submissions/' . $record->getFolderByResearchType() . '/' . $record->budget_file)
+                                ? asset('storage/submissions/' . $record->budget_file)
                                 : null,
                                 shouldOpenInNewTab: true
                             )
@@ -252,21 +262,19 @@ class ReviewSubmission extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('updateStatus')
-                ->label('Review Submission')
+            Action::make('updateStatus')
+                ->label('Review')
                 ->color('primary')
                 ->form([
-                    \Filament\Forms\Components\Select::make('status')
+                    Select::make('status')
                         ->label('Pilih Status Baru')
                         ->options([
-                            'pending' => 'Belum disetujui',
-                            'approved' => 'Disetujui',
                             'rejected' => 'Ditolak',
                             'revision' => 'Revisi',
                         ])
                         ->required(),
 
-                    \Filament\Forms\Components\Textarea::make('note')
+                    Textarea::make('note')
                         ->label('Catatan Revisi')
                         ->placeholder('Tulis catatan jika ada revisi atau penolakan')
                         ->rows(4)
@@ -278,7 +286,7 @@ class ReviewSubmission extends ViewRecord
                         'is_revised' => $data['status'] === 'revision' ? true : $this->record->is_revised,
                     ]);
 
-                    \App\Models\SubmissionNote::create([
+                    SubmissionNote::create([
                         'submission_id' => $this->record->id,
                         'admin_id' => auth()->id(),
                         'status' => $data['status'],
@@ -292,7 +300,121 @@ class ReviewSubmission extends ViewRecord
                             ->send();
                 })
                 ->hidden(fn ($record) => $record->status === 'approved'),
+            Action::make('approveDirectly')
+                ->label('Approval')
+                ->color('success')
+                // ->requiresConfirmation()
+                ->form(fn ($record) => [
+                    TextInput::make('docker_image')
+                        ->label('Docker Image Link')
+                        ->required()
+                        ->default(fn ($record) => $record->docker_image),
+
+                    TextInput::make('email')
+                        ->label('Email')
+                        ->required()
+                        ->email()
+                        ->default(fn ($record) => $record->member?->email),
+                    
+                    Select::make('hari_id')
+                        ->label('Hari')
+                        ->options($this->getHariOptions())
+                        ->required(),
+                    
+                    TextInput::make('durasi')
+                        ->label('Durasi (Hari)')
+                        ->numeric()
+                        ->minValue(1)
+                        ->required()
+                        ->suffix('hari'),
+                    
+                    Select::make('mesin_id')
+                        ->label('Pilih Mesin DGX')
+                        ->options($this->getMesinOptions())
+                        ->required(),
+
+                    Textarea::make('note')
+                        ->label('Detail Disetujui')
+                        ->placeholder('Detail disetujui...')
+                        ->rows(4),
+                ])
+                ->action(function (array $data): void {
+                    $this->record->update([
+                        'status' => 'approved',
+                    ]);
+
+                    SubmissionNote::create([
+                        'submission_id' => $this->record->id,
+                        'admin_id' => auth()->id(),
+                        'status' => 'approved',
+                        'note' => $data['note'] ?? 'Disetujui tanpa catatan tambahan.',
+                    ]);
+
+                    // Kirim ke API eksternal
+                    try {
+                        $response = Http::asForm()
+                            ->withoutVerifying()
+                            ->post('https://api-dummy.hpc-hs.my.id/dgx/approval', [
+                                'DockerImages' => $data['docker_image'],
+                                'username' => $data['email'],
+                                'id_hari' => $data['hari_id'],
+                                'durasi' => $data['durasi'],
+                                'id_mesin' => $data['mesin_id'],
+                            ]);
+
+                        if ($response->successful() && $response->json('error') === false) {
+                            Notification::make()
+                                ->success()
+                                ->title('Berhasil')
+                                ->body('Menyetujui pengajuan & berhasil kirim ke API.')
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal Kirim API')
+                                ->body('Approval lokal tersimpan, namun gagal kirim ke API.')
+                                ->send();
+                        }
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Error')
+                            ->body('Gagal kirim ke API: ' . $e->getMessage())
+                            ->send();
+                    }
+
+                    // Notification::make()
+                    //     ->success()
+                    //     ->title('Berhasil')
+                    //     ->body('Menyetujui pengajuan penelitian.')
+                    //     ->send();
+                })
+                ->hidden(fn ($record) => $record->status === 'approved'),
         ];
+    }
+
+    protected function getHariOptions(): array
+    {
+        try {
+            $response = Http::withoutVerifying()->get('https://api-dummy.hpc-hs.my.id/dgx/hari');
+            $data = $response->json('data') ?? [];
+
+            return collect($data)->pluck('nama', 'id')->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    protected function getMesinOptions(): array
+    {
+        try {
+            $response = Http::withoutVerifying()->get('https://api-dummy.hpc-hs.my.id/dgx/mesin');
+            $data = $response->json('data') ?? [];
+
+            return collect($data)->pluck('nama_mesin', 'id_mesin')->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
 

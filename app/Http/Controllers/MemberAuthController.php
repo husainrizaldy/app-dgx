@@ -25,7 +25,7 @@ class MemberAuthController extends Controller
 
         if (Auth::guard('member')->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/submission')->with('success', 'Berhasil login!');
+            return redirect()->intended('/status-submission')->with('success', 'Berhasil login!');
         }
 
         return back()->withErrors([

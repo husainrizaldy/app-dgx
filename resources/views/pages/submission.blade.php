@@ -4,12 +4,12 @@
 
 @section('content')
 <section class="bg-gray-100 min-h-[calc(100vh-4rem)] pt-28 pb-10">
-    <div class="container px-10 py-6">
+    <div class="container mx-auto">
     @php
         $tab = request()->query('tab', 'ta');
     @endphp
 
-    <div class="mb-4 border-b border-gray-200">
+    <div class="w-11/12 mx-auto mb-4 border-b border-gray-200">
         @if (session('success'))
             <div class="mb-4 p-3 rounded bg-green-100 text-green-800 font-medium text-sm">
                 {{ session('success') }}
@@ -31,7 +31,7 @@
         </nav>
     </div>
 
-    <div>
+    <div class="w-11/12 mx-auto">
         @if($tab == 'ta')
             @include('pages.tabs.form-ta')
         @elseif($tab == 'non-ta')

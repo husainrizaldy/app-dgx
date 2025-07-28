@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="bg-gray-100 min-h-[calc(100vh-4rem)] pt-28 pb-10">
-    <div class="container px-12 py-6">
+    <div class="container mx-auto">
         <div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8 border border-gray-200">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Registrasi</h2>
             <form action="{{ route('register.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" oninput="repass.setCustomValidity(repass.value !== password.value ? 'Password tidak sama' : '')">
